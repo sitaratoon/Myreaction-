@@ -20,8 +20,8 @@ async def callback_query_handler(client, query: CallbackQuery):
         await query.message.edit_caption(
             caption=text.HELP.format(query.from_user.mention),
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton('📢 𝖴𝗉𝖽𝖺𝗍𝖾𝗌', url='https://telegram.me/Techifybots'),
-                 InlineKeyboardButton('💬 𝖲𝗎𝗉𝗉𝗈𝗋𝗍', url='https://telegram.me/TechifySupport')],
+                [InlineKeyboardButton('📢 𝖴𝗉𝖽𝖺𝗍𝖾𝗌', url='https://t.me/ST_Rename_Update'),
+                 InlineKeyboardButton('💬 𝖲𝗎𝗉𝗉𝗈𝗋𝗍', url='https://t.me/ST_Bots_Update')],
                 [InlineKeyboardButton('↩️ 𝖡𝖺𝖼𝗄', callback_data="start"),
                  InlineKeyboardButton('❌ 𝖢𝗅𝗈𝗌𝖾', callback_data="close")]
             ])
@@ -39,4 +39,5 @@ async def callback_query_handler(client, query: CallbackQuery):
 
     elif query.data == "close":
         await query.message.delete()
+
 
