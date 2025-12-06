@@ -10,7 +10,7 @@ PICS = (os.environ.get("PICS", "")).split()
 LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "-1003455925059"))
 
 DB_URI = os.environ.get("DB_URI", "")
-DB_NAME = os.environ.get("DB_NAME", "")
+DB_NAME = os.environ.get("DB_NAME", "Cluster0")
 
 IS_FSUB = os.environ.get("IS_FSUB", "False").lower() == "true"  # Set "True" For Enable Force Subscribe
 AUTH_CHANNELS = list(map(int, os.environ.get("AUTH_CHANNEL", "-1002355394644 -1003022855971").split())) # Add Multiple channel ids
