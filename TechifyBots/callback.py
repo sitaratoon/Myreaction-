@@ -3,16 +3,35 @@ from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMa
 from Script import text
 from config import ADMIN
 
+
 @Client.on_callback_query()
 async def callback_query_handler(client, query: CallbackQuery):
+
+    # 🔥 FSUB TRY AGAIN BUTTON (MOST IMPORTANT PART)
+    if query.data == "check_fsub":
+        user_id = query.from_user.id
+        await query.message.delete()
+
+        # User ko /start fir se bhejo → FSUB dobara chalega
+        await client.send_message(user_id, "/start")
+        return
+
+    # ============================================
+    #       👇 Tumhara original callback code
+    # ============================================
+
     if query.data == "start":
         await query.message.edit_caption(
             caption=text.START.format(query.from_user.mention),
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton('⇆ 𝖠𝖽𝖽 𝖬𝖾 𝖳𝗈 𝖸𝗈𝗎𝗋 𝖢𝗁𝖺𝗇𝗇𝖾𝗅 ⇆', url='https://telegram.me/QuickReactRobot?startgroup=botstart')],
+                [InlineKeyboardButton(
+                    '⇆ 𝖠𝖽𝖽 𝖬𝖾 𝖳𝗈 𝖸𝗈𝗎𝗋 𝖢𝗁𝖺𝗇𝗇𝖾𝗅 ⇆',
+                    url='https://telegram.me/QuickReactRobot?startgroup=botstart')],
                 [InlineKeyboardButton('ℹ️ 𝖠𝖻𝗈𝗎𝗍', callback_data='about'),
                  InlineKeyboardButton('📚 𝖧𝖾𝗅𝗉', callback_data='help')],
-                [InlineKeyboardButton('⇆ 𝖠𝖽𝖽 𝖬𝖾 𝖳𝗈 𝖸𝗈𝗎𝗋 𝖢𝗁𝖺𝗇𝗇𝖾𝗅 ⇆', url='https://telegram.me/QuickReactRobot?startchannel=botstart')]
+                [InlineKeyboardButton(
+                    '⇆ 𝖠𝖽𝖽 𝖬𝖾 𝖳𝗈 𝖸𝗈𝗎𝗋 𝖢𝗁𝖺𝗇𝗇𝖾𝗅 ⇆',
+                    url='https://telegram.me/QuickReactRobot?startchannel=botstart')]
             ])
         )
 
@@ -39,5 +58,3 @@ async def callback_query_handler(client, query: CallbackQuery):
 
     elif query.data == "close":
         await query.message.delete()
-
-
