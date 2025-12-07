@@ -13,7 +13,7 @@ DB_URI = os.environ.get("DB_URI", "")
 DB_NAME = os.environ.get("DB_NAME", "Cluster0")
 
 IS_FSUB = os.environ.get("IS_FSUB", "True").lower() == "true"  # Set "True" For Enable Force Subscribe
-AUTH_CHANNELS = list(map(int, os.environ.get("AUTH_CHANNEL", "-1003432461141").split())) # Add Multiple channel ids
+AUTH_CHANNELS = list(map(int, os.environ.get("AUTH_CHANNEL", "-1003290630260").split())) # Add Multiple channel ids
 
 EMOJIS = [
     "❤️", "🔥", "🤗", "🥰", "👏",
