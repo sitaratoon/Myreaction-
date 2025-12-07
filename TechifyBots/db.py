@@ -1,32 +1,78 @@
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import AUTH_CHANNELS
-from pyrogram import Client
-from pyrogram.types import Message
-from typing import List
-from pyrogram.errors import UserNotParticipant
+from typing import Any
+from config import DB_URI, DB_NAME
+from motor import motor_asyncio
+from pymongo import ReturnDocument
+from pymongo.errors import DuplicateKeyError
+from bson import ObjectId
 
-async def get_fsub(bot: Client, message: Message) -> bool:
-    tb = await bot.get_me()
-    user_id = message.from_user.id
-    not_joined_channels = []
-    for channel_id in AUTH_CHANNELS:
+client = motor_asyncio.AsyncIOMotorClient(DB_URI)
+db = client[DB_NAME]
+
+class Techifybots:
+    def __init__(self):
+        self.users = db["users"]
+        self.cache: dict[int, dict[str, Any]] = {}
+
+    async def add_user(self, user_id: int, name: str) -> dict[str, Any] | None:
         try:
-            await bot.get_chat_member(channel_id, user_id)
-        except UserNotParticipant:
-            chat = await bot.get_chat(channel_id)
-            invite_link = chat.invite_link or await bot.export_chat_invite_link(channel_id)
-            not_joined_channels.append((chat.title, invite_link))
-    if not_joined_channels:
-        join_buttons = []
-        for i in range(0, len(not_joined_channels), 2):
-            row = []
-            for j in range(2):
-                if i + j < len(not_joined_channels):
-                    title, link = not_joined_channels[i + j]
-                    button_text = f"{i + j + 1}. {title}"
-                    row.append(InlineKeyboardButton(button_text, url=link))
-            join_buttons.append(row)
-        join_buttons.append([InlineKeyboardButton("🔄 Try Again", url=f"https://telegram.me/{tb.username}?start=start")])
-        await message.reply(f"**🎭 {message.from_user.mention}, As I see, you haven’t joined my channel yet.\nPlease join by clicking the button below.**", reply_markup=InlineKeyboardMarkup(join_buttons))
-        return False
-    return True
+            user = {"user_id": int(user_id), "name": name}
+            saved = await self.users.find_one_and_update(
+                {"user_id": user["user_id"]},
+                {"$set": user},
+                upsert=True,
+                return_document=ReturnDocument.AFTER
+            )
+            if saved:
+                self.cache[user["user_id"]] = saved
+            return saved
+        except DuplicateKeyError:
+            existing = await self.users.find_one({"user_id": int(user_id)})
+            if existing:
+                self.cache[int(user_id)] = existing
+            return existing
+        except Exception as e:
+            print("Error in add_user:", e)
+            return None
+
+    async def get_user(self, user_id: int) -> dict[str, Any] | None:
+        try:
+            if user_id in self.cache:
+                return self.cache[user_id]
+            user = await self.users.find_one({"user_id": int(user_id)})
+            if user:
+                self.cache[user_id] = user
+            return user
+        except Exception as e:
+            print("Error in get_user:", e)
+            return None
+
+    async def get_all_users(self) -> list[dict[str, Any]]:
+        try:
+            users: list[dict[str, Any]] = []
+            async for user in self.users.find():
+                users.append(user)
+            return users
+        except Exception as e:
+            print("Error in get_all_users:", e)
+            return []
+
+    async def delete_user(self, identifier: int | str | ObjectId) -> bool:
+        try:
+            query = {}
+            if isinstance(identifier, int):
+                query = {"user_id": identifier}
+                self.cache.pop(identifier, None)
+            elif isinstance(identifier, (str, ObjectId)):
+                query = {"_id": ObjectId(identifier)} if isinstance(identifier, str) else {"_id": identifier}
+                doc = await self.users.find_one(query)
+                if doc and "user_id" in doc:
+                    self.cache.pop(int(doc["user_id"]), None)
+            else:
+                return False
+            result = await self.users.delete_one(query)
+            return result.deleted_count > 0
+        except Exception as e:
+            print("Error in delete_user:", e)
+            return False
+
+tb = Techifybots()
