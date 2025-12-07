@@ -2,19 +2,17 @@ from pyrogram import Client
 from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from Script import text
 from config import ADMIN
+from fsub import fsub_callback
 
 
 @Client.on_callback_query()
 async def callback_query_handler(client, query: CallbackQuery):
 
     # 🔥 FSUB TRY AGAIN BUTTON (MOST IMPORTANT PART)
-    if query.data == "check_fsub":
-        user_id = query.from_user.id
-        await query.message.delete()
 
-        # User ko /start fir se bhejo → FSUB dobara chalega
-        await client.send_message(user_id, "/start")
-        return
+@app.on_callback_query(filters.regex("fsub_check"))
+async def _fsub_check(client, query):
+    await fsub_callback(client, query)
 
     # ============================================
     #       👇 Tumhara original callback code
@@ -58,3 +56,4 @@ async def callback_query_handler(client, query: CallbackQuery):
 
     elif query.data == "close":
         await query.message.delete()
+
